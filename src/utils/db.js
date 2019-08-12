@@ -5,6 +5,6 @@ import config from "../config/config";
 const connection = knex(config.db);
 const db = bookshelf(connection);
 
-db.plugin(["registry"]);
+db.plugin(['registry', 'visibility']);
 
 export default db;

@@ -6,10 +6,10 @@ exports.up = function (knex, Promise) {
     table.string('first_name');
     table.string('middle_name')
     table.string('last_name');
-    table.enu('role', ['admin', 'student']).defaultsTo(1);
+    table.enu('role', ['admin', 'student']).defaultsTo('student');
     table.string('email');
     table.string('password');
-    table.enu('gender', ['male', 'female']).defaultsTo(0);
+    table.enu('gender', ['male', 'female']).defaultsTo('male');
     table.timestamp('last_login');
     table.timestamps();
   });

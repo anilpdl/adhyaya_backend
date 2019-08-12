@@ -4,7 +4,7 @@ exports.up = function (knex, Promise) {
   return knex.schema.createTable(TABLE_NAME, (table) => {
     table.increments();
     table.integer('user_id').references('id').inTable('users');
-    table.enu('status', ['pending', 'processing', 'completed']).defaultsTo(0);
+    table.enu('status', ['pending', 'processing', 'completed']).defaultsTo('pending');
     table.timestamps();
   });
 };
