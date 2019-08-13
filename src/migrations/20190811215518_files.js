@@ -3,9 +3,9 @@ const TABLE_NAME = 'files';
 exports.up = function (knex, Promise) {
   return knex.schema.createTable(TABLE_NAME, (table) => {
     table.increments();
-    table.string('name');
-    table.string('url');
-    table.bool('is_deleted');
+    table.string('name').notNull();
+    table.string('url').notNull();
+    table.bool('is_deleted').defaultsTo(false);
     table.timestamps();
   });
 };

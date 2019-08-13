@@ -6,14 +6,21 @@ import config from '../config/jsonconfig';
 
 export const sign_up = async (req, res) => {
   const { email, last_name, first_name, password, gender } = req.body;
+  if(!email || !password || !first_name || !last_name) {
+    res.status(400).send({
+      message: 'Missing some informations'
+    });
+
+    return;
+  }
   const foundUser = await User.forge({ email }).fetch();
   if (foundUser) {
     return res.status(403).json({ error: 'Email is already taken' });
   }
   bcrypt.hash(password, 10, (err, hash) => {
     if (err) {
-      return res.status(500).json({
-        error: err
+      return res.status(500).send({
+        message: err
       });
     }
     const user = new User({
@@ -35,8 +42,9 @@ export const sign_up = async (req, res) => {
       })
       .catch((err) => {
         console.log(err)
-        res.status(500).json({
-          error: err
+        res.status(500).send({
+          error: err,
+          message: 'Internal Server Error'
         });
       });
   });
@@ -45,8 +53,8 @@ export const sign_up = async (req, res) => {
 export const sign_in = function (req, res) {
   const { email, password } = req.body;
   if(!email || !password) {
-    res.status(401).json({
-      failed: 'Invalid Credentials Provided'
+    res.status(400).send({
+      message: 'Invalid Credentials Provided'
     });
 
     return;
@@ -55,8 +63,8 @@ export const sign_in = function (req, res) {
     .then((user) => {
       bcrypt.compare(password, user.get('password'), (err, result) => {
         if (err) {
-          return res.status(401).json({
-            failed: 'Incorrect Email or Password'
+          return res.status(401).send({
+            message: 'Incorrect Email or Password'
           });
         }
         if (result) {
@@ -78,14 +86,15 @@ export const sign_in = function (req, res) {
             user
           });
         }
-        return res.status(401).json({
-          failed: 'Incorrect Email or Password'
+        return res.status(401).send({
+          message: 'Incorrect Email or Password'
         });
       });
     })
     .catch((error) => {
-      res.status(500).json({
-        error: 'Email not found'
+      res.status(500).send({
+        error,
+        message: 'Internal server error'
       });
     });
 };
