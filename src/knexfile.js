@@ -1,6 +1,5 @@
 // Update with your config settings.
-
-var config = require('./config/config.json');
+const config = require('./config/config');
 
 module.exports = {
   development: {
