@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as User from '../daos/userDao';
+import * as UserInvitation from '../daos/userInvitation';
 
 import config from '../config/jsonconfig';
 
@@ -11,57 +12,60 @@ const responseMessage = {
 }
 
 export const sign_up = async (req, res) => {
-  const { email, last_name, middle_name, first_name, password, gender, role } = req.body;
-  console.log(req.body)
-  if(!email || !password || !first_name || !last_name) {
-    res.status(400).send({
+  const { last_name, middle_name, first_name, password, gender, role, invitation_id } = req.body;
+  if (!invitation_id || !password || !first_name || !last_name) {
+    return res.status(400).send({
       message: 'Missing some informations'
     });
-
-    return;
   }
+  const userInvitation = await UserInvitation.getDetail(invitation_id);
+  if(!userInvitation) {
+    return res.status(404).send({
+      message: 'The invitation is expired or already accepted'
+    });
+  }
+  const { email } = userInvitation.toJSON();
   const foundUser = await User.findByEmail(email);
   if (foundUser) {
     return res.status(403).json({ error: 'Email is already taken' });
   }
-  bcrypt.hash(password, 10, (err, hash) => {
+  bcrypt.hash(password, 10, async (err, hash) => {
     if (err) {
       console.log(err)
       return res.status(500).send({
         message: err
       });
     }
-    const user = new User({
-      first_name,
-      middle_name,
-      last_name,
-      email,
-      password: hash,
-      gender,
-      role: 'student'
-    });
-    user
-      .save()
-      .then((result) => {
-        console.log(result);
+    try {
+      const user = await User.create({
+        first_name,
+        middle_name,
+        last_name,
+        email,
+        password: hash,
+        gender,
+        role
+      });
+      if (user) {
+        UserInvitation.deleteUserInvitation(invitation_id);
         res.status(200).json({
           success: 'Signed up successfully',
           user
         });
-      })
-      .catch((err) => {
-        console.log(err)
-        res.status(500).send({
-          error: err,
-          message: 'Internal Server Error'
-        });
+      }
+    } catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: err,
+        message: 'Internal Server Error'
       });
+    }
   });
 };
 
 export const sign_in = function (req, res) {
   const { email, password } = req.body;
-  if(!email || !password) {
+  if (!email || !password) {
     res.status(400).send(JSON.stringify({
       message: responseMessage.SIGNIN_EMPTY
     }));
@@ -88,6 +92,7 @@ export const sign_in = function (req, res) {
             }
           );
           const bearerToken = `${'Bearer' + ' '}${JWTToken}`;
+          User.updateLogin(user.get('id'));
           return res.status(200).json({
             auth: true,
             message: responseMessage.SIGNIN_SUCCESS,
@@ -112,19 +117,19 @@ export const sign_in = function (req, res) {
 export const getDetail = async (req, res) => {
   const { userId } = req.params;
   const authToken = req.headers.authorization;
-  const token = authToken.replace('Bearer ','');
+  const token = authToken.replace('Bearer ', '');
 
-  jwt.verify(token, config.secret, async function(err, decoded) {
+  jwt.verify(token, config.secret, async function (err, decoded) {
     if (err) return res.status(401).send({ auth: false, message: 'Failed to authenticate token.' });
     const { id } = decoded;
     const user = await User.getDetail(id);
     const role = user.get('role');
-    if(role == 'student') {
-      if(id != userId) {
-        return res.status(403).send({ message: 'Access Forbidden'})
+    if (role == 'student') {
+      if (id != userId) {
+        return res.status(403).send({ message: 'Access Forbidden' })
       }
     }
-    if(userId) {
+    if (userId) {
       const user = await User.getDetail(userId);
       return res.status(200).json({
         user

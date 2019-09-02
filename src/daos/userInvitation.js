@@ -11,7 +11,7 @@ export const getDetail = async (id) => {
 }
 
 export const deleteUserInvitation = async (id) => {
-  const deleteStatus = await UserInvitation.forge({id}).destroy();
+  const deleteStatus = await UserInvitation.forge({ id }).destroy();
   return deleteStatus;
 }
 
