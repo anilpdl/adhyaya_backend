@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import * as User from '../daos/userDao';
 
 import config from '../config/jsonconfig';
 
@@ -11,7 +11,7 @@ const responseMessage = {
 }
 
 export const sign_up = async (req, res) => {
-  const { email, last_name, first_name, password, gender } = req.body;
+  const { email, last_name, middle_name, first_name, password, gender, role } = req.body;
   console.log(req.body)
   if(!email || !password || !first_name || !last_name) {
     res.status(400).send({
@@ -20,7 +20,7 @@ export const sign_up = async (req, res) => {
 
     return;
   }
-  const foundUser = await User.forge({ email }).fetch();
+  const foundUser = await User.findByEmail(email);
   if (foundUser) {
     return res.status(403).json({ error: 'Email is already taken' });
   }
@@ -33,6 +33,7 @@ export const sign_up = async (req, res) => {
     }
     const user = new User({
       first_name,
+      middle_name,
       last_name,
       email,
       password: hash,
@@ -67,7 +68,7 @@ export const sign_in = function (req, res) {
 
     return;
   }
-  User.forge({ email }).fetch()
+  User.findByEmail(email)
     .then((user) => {
       bcrypt.compare(password, user.get('password'), (err, result) => {
         if (err) {
@@ -83,7 +84,7 @@ export const sign_in = function (req, res) {
             },
             config.secret,
             {
-              expiresIn: 60
+              expiresIn: 7200
             }
           );
           const bearerToken = `${'Bearer' + ' '}${JWTToken}`;
@@ -112,11 +113,11 @@ export const getDetail = async (req, res) => {
   const { userId } = req.params;
   const authToken = req.headers.authorization;
   const token = authToken.replace('Bearer ','');
-  console.log(token)
+
   jwt.verify(token, config.secret, async function(err, decoded) {
     if (err) return res.status(401).send({ auth: false, message: 'Failed to authenticate token.' });
     const { id } = decoded;
-    const user = await User.forge({ id }).fetch();
+    const user = await User.getDetail(id);
     const role = user.get('role');
     if(role == 'student') {
       if(id != userId) {
@@ -124,7 +125,7 @@ export const getDetail = async (req, res) => {
       }
     }
     if(userId) {
-      const user = await User.forge({ id: userId }).fetch();
+      const user = await User.getDetail(userId);
       return res.status(200).json({
         user
       });
