@@ -8,7 +8,7 @@ export const create = async (req, res) => {
   const user = await User.findByEmail(email);
   const userInvitation = await UserInvitation.findByEmail(email);
   if (user || userInvitation) {
-    return res.status(403).json({ error: 'User with email already exists' });
+    return res.status(403).json({ message: 'User with email already exists' });
   }
 
   const newUserInvitation = await UserInvitation.createUserInvitation(email);
@@ -21,7 +21,7 @@ export const create = async (req, res) => {
 
 export const resendInvitation = async (req, res) => {
   const { userInvitationId } = req.params;
-  
+
   const userInvitation = await UserInvitation.getDetail(userInvitationId);
   if(userInvitation) {
     userInvitation.save({ updated_at: new Date(Date.now())});
@@ -74,4 +74,33 @@ export const getDetail = async (req, res) => {
       message: 'Internal server error'
     })
   }
+}
+
+export const getAll = async (req, res) => {
+  const userInvitations = await UserInvitation.fetchAll();
+  res.send({
+    userInvitations
+  });
+}
+
+export const deleteInvitation = async (req, res) => {
+  const { userInvitationId } = req.params;
+  const userInvitation = await UserInvitation.getDetail(userInvitationId);
+
+  try {
+    if (userInvitation) {
+      const status = UserInvitation.deleteUserInvitation(userInvitationId);
+      return res.send({
+        status
+      })
+    }
+
+    return res.status(404).send({
+      message: 'Invitation link does not exist'
+    });
+  } catch (err) {
+    return res.status(500).send({
+      message: "Error deleting invitation link"
+    })
+ }
 }

@@ -11,6 +11,13 @@ const responseMessage = {
   SIGNIN_ERROR: 'Incorrect Email or Password '
 }
 
+export const getAll = async (req, res) => {
+  const users = await User.fetchAll();
+  return res.send({
+    users
+  })
+}
+
 export const sign_up = async (req, res) => {
   const { last_name, middle_name, first_name, password, gender, role, invitation_id } = req.body;
   if (!invitation_id || !password || !first_name || !last_name) {

@@ -19,3 +19,9 @@ export const createUserInvitation = async (email) => {
   const userInvitation = await UserInvitation.forge({ email }).save();
   return userInvitation;
 }
+
+export const fetchAll = async () => {
+  const userInvitations = await UserInvitation.fetchAll();
+
+  return userInvitations;
+}
