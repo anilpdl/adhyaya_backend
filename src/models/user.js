@@ -2,10 +2,10 @@ import db from "../utils/db";
 
 const TABLE_NAME = "users";
 
-var User = db.Model.extend({
+const User = db.model('User', {
   tableName: TABLE_NAME,
-  hasTimeStamp: true,
+  hasTimestamps: true,
   hidden: ['password'],
 });
 
-export default db.model('User',User);
+export default User;
