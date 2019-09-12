@@ -1,5 +1,6 @@
 import * as UserInvitation from '../daos/userInvitation';
 import * as User from '../daos/userDao';
+import * as AuthController from './authController';
 import { sendEmail } from './sendgrid';
 
 export const create = async (req, res) => {
@@ -23,10 +24,10 @@ export const resendInvitation = async (req, res) => {
   const { userInvitationId } = req.params;
 
   const userInvitation = await UserInvitation.getDetail(userInvitationId);
-  if(userInvitation) {
-    userInvitation.save({ updated_at: new Date(Date.now())});
+  if (userInvitation) {
+    userInvitation.save({ updated_at: new Date(Date.now()) });
     const { email, id } = userInvitation.toJSON();
-    sendEmail( email, id);
+    sendEmail(email, id);
     res.send({
       userInvitation
     });
@@ -77,10 +78,13 @@ export const getDetail = async (req, res) => {
 }
 
 export const getAll = async (req, res) => {
-  const userInvitations = await UserInvitation.fetchAll();
-  res.send({
-    userInvitations
-  });
+  const authData = await AuthController.checkAccess(req, res);
+  if (authData.isAdmin) {
+    const userInvitations = await UserInvitation.fetchAll();
+    res.send({
+      userInvitations
+    });
+  }
 }
 
 export const deleteInvitation = async (req, res) => {
@@ -102,5 +106,5 @@ export const deleteInvitation = async (req, res) => {
     return res.status(500).send({
       message: "Error deleting invitation link"
     })
- }
+  }
 }

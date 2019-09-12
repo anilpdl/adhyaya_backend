@@ -24,7 +24,7 @@ export const updateLogin = async (id) => {
 }
 
 export const fetchAll = async () => {
-  const users = await User.fetchAll();
-
-  return users;
+  const users = await User.fetchAll({ withRelated: ['files']});
+  
+  return users.toJSON();
 }

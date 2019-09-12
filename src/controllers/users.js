@@ -1,5 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
+import * as AuthController from './authController';
 import * as User from '../daos/userDao';
 import * as UserInvitation from '../daos/userInvitation';
 
@@ -12,10 +14,14 @@ const responseMessage = {
 }
 
 export const getAll = async (req, res) => {
-  const users = await User.fetchAll();
-  return res.send({
-    users
-  })
+  const authData = await AuthController.checkAccess(req, res);
+  if (authData.isAdmin) {
+    const users = await User.fetchAll();
+    return res.send({
+      users
+    })
+  }
+  return res.status(403).send({ message: 'Access Forbidden' });
 }
 
 export const sign_up = async (req, res) => {
@@ -26,7 +32,7 @@ export const sign_up = async (req, res) => {
     });
   }
   const userInvitation = await UserInvitation.getDetail(invitation_id);
-  if(!userInvitation) {
+  if (!userInvitation) {
     return res.status(404).send({
       message: 'The invitation is expired or already accepted'
     });
@@ -123,24 +129,11 @@ export const sign_in = function (req, res) {
 
 export const getDetail = async (req, res) => {
   const { userId } = req.params;
-  const authToken = req.headers.authorization;
-  const token = authToken.replace('Bearer ', '');
-
-  jwt.verify(token, config.secret, async function (err, decoded) {
-    if (err) return res.status(401).send({ auth: false, message: 'Failed to authenticate token.' });
-    const { id } = decoded;
-    const user = await User.getDetail(id);
-    const role = user.get('role');
-    if (role == 'student') {
-      if (id != userId) {
-        return res.status(403).send({ message: 'Access Forbidden' })
-      }
-    }
-    if (userId) {
-      const user = await User.getDetail(userId);
-      return res.status(200).json({
-        user
-      });
-    }
-  });
+  const authData = await AuthController.checkAccess(req, res);
+  if (!authData.isInvalid) {
+    const user = await User.getDetail(userId);
+    return res.status(200).json({
+      user
+    });
+  }
 }
