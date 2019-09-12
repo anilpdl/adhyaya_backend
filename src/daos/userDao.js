@@ -23,6 +23,20 @@ export const updateLogin = async (id) => {
   return change;
 }
 
+export const update = async (id, data) => {
+  const { first_name, last_name, middle_name, gender } = data;
+  const user = await getDetail(id);
+  const change = await user.save({ first_name, last_name, middle_name, gender });
+
+  return change;
+}
+
+export const updatePassword = async (password, id) => {
+  const user = await getDetail(id);
+  const change = await user.save({ password });
+  return change;
+}
+
 export const fetchAll = async () => {
   const users = await User.fetchAll({ withRelated: ['files']});
   

@@ -10,7 +10,8 @@ import config from '../config/jsonconfig';
 const responseMessage = {
   SIGNIN_SUCCESS: 'Signed in successfully',
   SIGNIN_EMPTY: 'Invalid Credentials Provided',
-  SIGNIN_ERROR: 'Incorrect Email or Password '
+  SIGNIN_ERROR: 'Incorrect Email or Password ',
+  PASSWORD_ERROR: 'Old password is incorrect'
 }
 
 export const getAll = async (req, res) => {
@@ -128,12 +129,71 @@ export const sign_in = function (req, res) {
 };
 
 export const getDetail = async (req, res) => {
-  const { userId } = req.params;
-  const authData = await AuthController.checkAccess(req, res);
-  if (!authData.isInvalid) {
-    const user = await User.getDetail(userId);
-    return res.status(200).json({
-      user
+  try {
+    const { userId } = req.params;
+    const authData = await AuthController.checkAccess(req, res);
+    if (!authData.isInvalid) {
+      const user = await User.getDetail(userId);
+      return res.status(200).json({
+        user
+      });
+    }
+  } catch (err) {
+
+  }
+}
+
+export const updateDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const data = req.body;
+    const authData = await AuthController.checkAccess(req, res);
+    if (!authData.isInvalid) {
+      const user = await User.update(userId, data);
+      return res.status(200).json({
+        user
+      });
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+export const changePassword = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { old_password, new_password } = req.body;
+    const authData = await AuthController.checkAccess(req, res);
+    if (!authData.isInvalid) {
+      const user = await User.getDetail(userId);
+      const password = user.get('password');
+      bcrypt.compare(old_password, password, async (err, result) => {
+        if (err) {
+          return res.status(403).send({
+            message: responseMessage.PASSWORD_ERROR
+          });
+        }
+        if (result) {
+           return bcrypt.hash(new_password, 10, async (err, hash) => {
+            if (err) {
+              return res.status(500).send({
+                message: 'Internal Server Error'
+              });
+            }
+            const updatedPassword = await User.updatePassword(hash, userId);
+            return res.status(200).send({ message: 'Password changed successfully' });
+          });
+
+        }
+        return res.status(403).send({
+          message: responseMessage.PASSWORD_ERROR
+        });
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(403).send({
+      message: responseMessage.PASSWORD_ERROR
     });
   }
 }
