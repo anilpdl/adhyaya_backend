@@ -11,7 +11,7 @@ export const findByEmail = async (email) => {
 }
 
 export const getDetail = async (id) => {
-  const user = await User.forge({ id }).fetch();
+  const user = await User.forge({ id }).fetch({ withRelated: ['user_avatar'] });
   return user;
 }
 
@@ -38,7 +38,17 @@ export const updatePassword = async (password, id) => {
 }
 
 export const fetchAll = async () => {
-  const users = await User.fetchAll({ withRelated: ['files']});
+  const users = await User.where({ role: 'student'}).fetchAll({ withRelated: ['files', 'user_avatar']});
   
   return users.toJSON();
+}
+
+export const getCount = async () => {
+  try {
+    const count = await User.where({ role: 'student' }).count();
+
+    return count;
+  } catch (err) {
+    throw err;
+  }
 }

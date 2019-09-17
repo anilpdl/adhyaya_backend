@@ -32,13 +32,13 @@ export const sign_up = async (req, res) => {
       message: 'Missing some informations'
     });
   }
-  const userInvitation = await UserInvitation.getDetail(invitation_id);
+  const userInvitation = await UserInvitation.getTokenDetail(invitation_id);
   if (!userInvitation) {
     return res.status(404).send({
       message: 'The invitation is expired or already accepted'
     });
   }
-  const { email } = userInvitation.toJSON();
+  const { id, email } = userInvitation.toJSON();
   const foundUser = await User.findByEmail(email);
   if (foundUser) {
     return res.status(403).json({ error: 'Email is already taken' });
@@ -61,7 +61,7 @@ export const sign_up = async (req, res) => {
         role
       });
       if (user) {
-        UserInvitation.deleteUserInvitation(invitation_id);
+        UserInvitation.deleteUserInvitation(id);
         res.status(200).json({
           success: 'Signed up successfully',
           user

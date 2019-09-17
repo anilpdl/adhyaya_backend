@@ -5,6 +5,7 @@ exports.up = function (knex, Promise) {
     table.increments();
     table.string('name').notNull();
     table.string('url').notNull();
+    table.string('format');
     table.bool('is_deleted').defaultsTo(false);
     table.timestamps();
   });

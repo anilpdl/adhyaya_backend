@@ -47,8 +47,6 @@ export const getDetail = async (req, res) => {
   const { userId } = req.params;
   const authToken = req.headers.authorization;
   const token = authToken.replace('Bearer ', '');
-  const dec = jwt.verify(token, config.secret);
-  console.log(dec)
 
   jwt.verify(token, config.secret, async function (err, decoded) {
     if (err) return res.status(401).send({ auth: false, message: 'Failed to authenticate token.' });

@@ -5,6 +5,7 @@ import * as Files from '../daos/fileDao';
 import * as UserFile from '../daos/userFileDao';
 import { uploader, utils } from '../config/cloudinary';
 import { dataUri } from '../middlewares/multer';
+import UserAvatar from '../models/UserAvatar';
 
 const responseMessage = {
   SUCCESS: 'Signed in successfully',
@@ -29,12 +30,13 @@ export const getUserFiles = async (req, res) => {
 
 const uploadFileToCloudinary = async (file) => {
   try {
+    const { originalname } = file;
     const fileToUpload = dataUri(file);
     const uploadedFile = await uploader.upload(fileToUpload);
 
-    return uploadedFile;
+    return { ...uploadedFile, originalname };
   } catch (err) {
-    return err;
+    throw err;
   }
 }
 
@@ -53,14 +55,39 @@ export const create = async (req, res) => {
   if (files.length) {
     try {
       const uploadedFiles = await Promise.all(files.map((file) => uploadFileToCloudinary(file)));
-      console.log(uploadedFiles)
-      const uploadedFileUrls = uploadedFiles.map(({format, secure_url}) => ({ name: format, url:secure_url }));
+      const uploadedFileUrls = uploadedFiles.map(({format, secure_url, originalname }) => ({ name: originalname, url:secure_url, format }));
       const savedFiles = await saveFiles(uploadedFileUrls);
       const userFiles = savedFiles.map(file => ({ file_id: file.id, user_id: parseInt(userId) }));
       const savedUserFiles = await UserFile.bulkSaveFile(userFiles);
       return res.status(200).json({
         files: savedUserFiles
       });
+    } catch (err) {
+      console.log(err)
+      return res.status(400).json({
+        message: responseMessage.ERROR
+      });
+    }
+  }
+  else {
+    res.status(400).json({
+      message: responseMessage.ERROR
+    })
+  }
+}
+
+export const createAvatar = async (req, res) => {
+  const { userId } = req.params;
+  const { file } = req;
+  
+  if (file) {
+    try {
+      const uploadedFile = await uploadFileToCloudinary(file);
+      const { secure_url: url } = uploadedFile;
+      const userAvatar = await UserAvatar.create({ url, user_id: userId});
+      return res.status(200).json(
+        userAvatar
+      );
     } catch (err) {
       console.log(err)
       return res.status(400).json({

@@ -1,3 +1,6 @@
+import cryptoRandomString from 'crypto-random-string';
+import bookshelf from '../utils/db';
+
 import * as UserInvitation from '../daos/userInvitation';
 import * as User from '../daos/userDao';
 import * as AuthController from './authController';
@@ -6,44 +9,64 @@ import { sendEmail } from './sendgrid';
 export const create = async (req, res) => {
   const { email } = req.body;
 
-  const user = await User.findByEmail(email);
-  const userInvitation = await UserInvitation.findByEmail(email);
-  if (user || userInvitation) {
-    return res.status(403).json({ message: 'User with email already exists' });
+  try {
+    const user_invitation = await bookshelf.transaction(async (t) => {
+      const user = await User.findByEmail(email);
+      const userInvitation = await UserInvitation.findByEmail(email);
+      if (user || userInvitation) {
+        return res.status(403).json({ message: 'User with email already exists' });
+      }
+      const invitation_token = cryptoRandomString(8);
+      const newUserInvitation = await UserInvitation.createUserInvitation(email, invitation_token, t);
+      const { token } = newUserInvitation.toJSON();
+      if (token) {
+        await sendEmail(email, token);
+      };
+      return newUserInvitation;
+    })
+    res.send({
+      user_invitation
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: 'Error sending user invitation'
+    });
   }
-
-  const newUserInvitation = await UserInvitation.createUserInvitation(email);
-  const { id } = newUserInvitation.toJSON();
-  if (id) sendEmail(email, id);
-  res.send({
-    user_invitation: newUserInvitation
-  });
 }
 
 export const resendInvitation = async (req, res) => {
   const { userInvitationId } = req.params;
 
-  const userInvitation = await UserInvitation.getDetail(userInvitationId);
-  if (userInvitation) {
-    userInvitation.save({ updated_at: new Date(Date.now()) });
-    const { email, id } = userInvitation.toJSON();
-    sendEmail(email, id);
-    res.send({
-      userInvitation
-    });
-    return;
-  }
+  try {
+    const userInvitation = await UserInvitation.getDetail(userInvitationId);
+    if (userInvitation) {
+      userInvitation.save({ updated_at: new Date(Date.now()) });
+      const { email, id } = userInvitation.toJSON();
+      await sendEmail(email, id);
+      res.send({
+        userInvitation
+      });
+      return;
+    }
 
-  res.status(500).json({
-    message: "Invitation not found"
-  });
+    res.status(500).json({
+      message: "Invitation not found"
+    });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      message: "Error sending invitation link",
+      error: err
+    });
+  }
 }
 
 export const getDetail = async (req, res) => {
   const { userInvitationId } = req.params;
 
   try {
-    const userInvitation = await UserInvitation.getDetail(userInvitationId);
+    const userInvitation = await UserInvitation.getTokenDetail(userInvitationId);
     if (userInvitation) {
       const updated_at = userInvitation.get('updated_at');
       const updatedDate = new Date(updated_at);

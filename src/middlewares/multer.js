@@ -5,6 +5,7 @@ import path from 'path';
 const storage = multer.memoryStorage();
 
 const multerUploads = multer({ storage }).array('file');
+const multerAvatarUpload = multer({ storage }).single('avatar');
 
 const dUri = new Datauri();
 
@@ -13,4 +14,4 @@ const dataUri = file => {
   return uri.content;
 };
 
-export { multerUploads, dataUri };
+export { multerUploads, dataUri, multerAvatarUpload };
