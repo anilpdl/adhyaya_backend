@@ -5,7 +5,7 @@ import * as Files from '../daos/fileDao';
 import * as UserFile from '../daos/userFileDao';
 import { uploader, utils } from '../config/cloudinary';
 import { dataUri } from '../middlewares/multer';
-import UserAvatar from '../models/UserAvatar';
+import * as UserAvatar from '../daos/userAvatarDao';
 
 const responseMessage = {
   SUCCESS: 'Signed in successfully',
