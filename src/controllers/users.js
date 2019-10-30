@@ -1,9 +1,14 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import cryptoRandomString from 'crypto-random-string';
+
+import bookshelf from '../utils/db';
 
 import * as AuthController from './authController';
 import * as User from '../daos/userDao';
 import * as UserInvitation from '../daos/userInvitation';
+import * as ForgotPassword from '../daos/forgotPassword';
+import { sendPasswordResetMail } from './sendgrid';
 
 import config from '../config/jsonconfig';
 
@@ -174,7 +179,7 @@ export const changePassword = async (req, res) => {
           });
         }
         if (result) {
-           return bcrypt.hash(new_password, 10, async (err, hash) => {
+          return bcrypt.hash(new_password, 10, async (err, hash) => {
             if (err) {
               return res.status(500).send({
                 message: 'Internal Server Error'
@@ -191,6 +196,69 @@ export const changePassword = async (req, res) => {
       });
     }
   } catch (err) {
+    console.log(err);
+    return res.status(403).send({
+      message: responseMessage.PASSWORD_ERROR
+    });
+  }
+}
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findByEmail(email);
+    if (user) {
+      const { first_name } = user.toJSON();
+      const name = first_name;
+      const passwordReset = await bookshelf.transaction(async (t) => {
+        const passwordResetToken = cryptoRandomString(8);
+        const newPasswordReset = await ForgotPassword.createPasswordResetToken(email, passwordResetToken, t);
+        const { token } = newPasswordReset.toJSON();
+        if (token) {
+          await sendPasswordResetMail(email, name, token);
+        };
+        return newPasswordReset;
+      })
+      return res.send({
+        passwordReset
+      });
+    }
+    return res.status(404).json({
+      message: "User not found"
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: 'Error resetting password'
+    });
+  }
+}
+
+export const resetPassword = async (req, res) => {
+  const { password, token } = req.body;
+  try {
+    const forgotPassword = await ForgotPassword.getTokenDetail(token);
+    if (forgotPassword) {
+      const { id, email } = forgotPassword.toJSON();
+      const userByEmail = await User.findByEmail(email);
+      const { id: user_id } = userByEmail.toJSON();
+      return bcrypt.hash(password, 10, async (err, hash) => {
+        if (err) {
+          return res.status(500).send({
+            message: 'Internal Server Error'
+          });
+        }
+        const updatedPassword = await User.updatePassword(hash, user_id);
+        if (updatedPassword)
+          await ForgotPassword.deletePasswordToken(id);
+        return res.status(200).send({ message: 'Password changed successfully' });
+      });
+    }
+    return res.status(404).send({
+      message: 'Reset link is invalid'
+    });
+  }
+  catch (err) {
     console.log(err);
     return res.status(403).send({
       message: responseMessage.PASSWORD_ERROR

@@ -50,7 +50,7 @@ export const resendInvitation = async (req, res) => {
       return;
     }
 
-    res.status(500).json({
+    res.status(404).json({
       message: "Invitation not found"
     });
   } catch (err) {
