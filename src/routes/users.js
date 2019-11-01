@@ -24,5 +24,4 @@ router.post('/:userId/file', multerUploads, fileHandlers.create);
 router.post('/:userId/password', userHandlers.changePassword);
 router.post('/:userId', userHandlers.updateDetails);
 
-
 export default router;

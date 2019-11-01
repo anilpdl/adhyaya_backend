@@ -112,3 +112,38 @@ export const createAvatar = async (req, res) => {
     })
   }
 }
+
+export const fetchDetail = async (req, res) => {
+  const { fileId } = req.params;
+  const authData = await AuthController.checkAccess(req, res);
+  if (!authData.isInvalid) {
+    try {
+      const file = await Files.getDetail(fileId);
+      return res.send(file);
+    }
+    catch (err) {
+      console.log(err)
+      return res.status(400).json({
+        message: responseMessage.ERROR
+      });
+    }
+  }
+}
+
+export const updateDetails = async (req, res) => {
+  const { fileId } = req.params;
+  const { approverId } = req.body;
+  const authData = await AuthController.checkAccess(req, res);
+  if (authData.isAdmin) {
+    try {
+      const file = await Files.updateDetails(fileId, approverId);
+      return res.send(file);
+    }
+    catch (err) {
+      console.log(err)
+      return res.status(400).json({
+        message: responseMessage.ERROR
+      });
+    }
+  }
+}

@@ -16,6 +16,10 @@ const User = db.model('User', {
 
   user_avatar: function() {
     return this.hasOne('UserAvatar');
+  },
+
+  approved_files: function() {
+    return this.hasMany('File', 'id', 'user_id');
   }
 });
 

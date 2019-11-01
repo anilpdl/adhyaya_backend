@@ -10,6 +10,10 @@ const File = db.model('File', {
   user: function() {
     //id of this modal
     return this.belongsTo('User').through('UserFile', 'id', 'user_id', 'file_id');
+  },
+
+  approved_by: function() {
+    return this.belongsTo('User', 'approver_id', 'id')
   }
 });
 

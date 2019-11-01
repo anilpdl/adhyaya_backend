@@ -14,4 +14,7 @@ router.use(cors());
 router.get('/', fileHandlers.getAll);
 router.post('/', multerUploads, fileHandlers.create);
 
+router.get('/:fileId', fileHandlers.fetchDetail);
+router.post('/:fileId', fileHandlers.updateDetails);
+
 export default router;
