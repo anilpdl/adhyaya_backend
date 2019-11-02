@@ -10,6 +10,7 @@ import * as UserAvatar from '../daos/userAvatarDao';
 const responseMessage = {
   SUCCESS: 'Signed in successfully',
   ERROR: 'Something went wrong when uploading files',
+  DELETE_ERROR: 'Error deleting file'
 }
 
 export const getAll = async (req, res) => {
@@ -143,6 +144,26 @@ export const updateDetails = async (req, res) => {
       console.log(err)
       return res.status(400).json({
         message: responseMessage.ERROR
+      });
+    }
+  }
+}
+
+export const deleteFile = async (req, res) => {
+  const { fileId } = req.params;
+
+  const authData = await AuthController.checkAccess(req, res);
+  if (!authData.isInvalid) {
+    try {
+      const file = await Files.softDeleteFile(fileId);
+      return res.send({
+        message: "File deleted successfully"
+      });
+    }
+    catch (err) {
+      console.log(err)
+      return res.status(400).json({
+        message: responseMessage.DELETE_ERROR
       });
     }
   }

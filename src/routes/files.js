@@ -17,4 +17,6 @@ router.post('/', multerUploads, fileHandlers.create);
 router.get('/:fileId', fileHandlers.fetchDetail);
 router.post('/:fileId', fileHandlers.updateDetails);
 
+router.delete('/:fileId', fileHandlers.deleteFile)
+
 export default router;
