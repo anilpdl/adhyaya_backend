@@ -15,6 +15,13 @@ export const getDetail = async (id) => {
   return user;
 }
 
+export const getUserFiles = async (id) => {
+  const user = await User.forge({ id }).fetch({ withRelated: ['files.user'] });
+  const files = user.related('files');
+
+  return files;
+}
+
 export const updateLogin = async (id) => {
   const user = await User.forge({ id }).fetch();
   const currentDate = new Date();

@@ -265,3 +265,16 @@ export const resetPassword = async (req, res) => {
     });
   }
 }
+
+
+export const getUserFiles = async (req, res) => {
+  const { userId } = req.params;
+  const authData = await AuthController.checkAccess(req, res);
+  if (!authData.isInvalid) {
+    const files = await User.getUserFiles(userId);
+    return res.send(
+      files
+    )
+  }
+  return res.status(403).send({ message: 'Access Forbidden' });
+}
