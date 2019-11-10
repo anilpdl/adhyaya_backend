@@ -8,7 +8,7 @@ import * as AuthController from './authController';
 import * as User from '../daos/userDao';
 import * as UserInvitation from '../daos/userInvitation';
 import * as ForgotPassword from '../daos/forgotPassword';
-import { sendPasswordResetMail } from './sendgrid';
+import { sendPasswordResetMail, sendSubscriptionEmail } from './sendgrid';
 
 import config from '../config/jsonconfig';
 
@@ -277,4 +277,10 @@ export const getUserFiles = async (req, res) => {
     )
   }
   return res.status(403).send({ message: 'Access Forbidden' });
+}
+
+export const subscribe = async (req, res) => {
+  const { email } = req.body;
+  sendSubscriptionEmail(email);
+  res.send();
 }

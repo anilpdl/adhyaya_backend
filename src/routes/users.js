@@ -16,6 +16,7 @@ router.get('/all', userHandlers.getAll);
 router.get('/:userId', userHandlers.getDetail);
 router.get('/:userId/files', userHandlers.getUserFiles);
 
+router.post('/subscribe', userHandlers.subscribe);
 router.post('/signup', userHandlers.sign_up);
 router.post('/signin', userHandlers.sign_in);
 router.post('/forgot_password', userHandlers.forgotPassword);

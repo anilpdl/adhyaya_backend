@@ -60,3 +60,23 @@ export const sendPasswordResetMail = async (toEmail, name, token) => {
     throw err;
   }
 }
+
+export const sendSubscriptionEmail = async (email) => {
+  try {
+    const msg = {
+      to: 'poudelanil1996@gmail.com',
+      from: 'info@adhyaya.com.np',
+      subject: 'Reach out',
+      text: `${email} wants to know more about Adhyaya Educational Services`
+    };
+
+    return sgMail.send(msg, false, (error, result) => {
+      if (error) {
+        return error;
+      }
+      return result;
+    });
+  } catch (err) {
+    throw err;
+  }
+}

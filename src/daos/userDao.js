@@ -25,7 +25,7 @@ export const getUserFiles = async (id) => {
 export const updateLogin = async (id) => {
   const user = await User.forge({ id }).fetch();
   const currentDate = new Date();
-  const change = await user.save({ last_login: currentDate});
+  const change = await user.save({ last_login: currentDate });
 
   return change;
 }
@@ -45,8 +45,8 @@ export const updatePassword = async (password, id) => {
 }
 
 export const fetchAll = async () => {
-  const users = await User.where({ role: 'student'}).fetchAll({ withRelated: ['files', 'user_avatar']});
-  
+  const users = await User.where({ role: 'student' }).fetchAll({ withRelated: ['files', 'user_avatar'] });
+
   return users.toJSON();
 }
 
