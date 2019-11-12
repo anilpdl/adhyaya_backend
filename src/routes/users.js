@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { multerUploads, multerAvatarUpload } from '../middlewares/multer';
 import * as fileHandlers from '../controllers/files';
 import * as userHandlers from '../controllers/users';
+import * as educationHandlers from '../controllers/education';
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.use(cors());
 router.get('/all', userHandlers.getAll);
 router.get('/:userId', userHandlers.getDetail);
 router.get('/:userId/files', userHandlers.getUserFiles);
+router.get('/:userId/education', educationHandlers.getAll);
 
 router.post('/subscribe', userHandlers.subscribe);
 router.post('/signup', userHandlers.sign_up);

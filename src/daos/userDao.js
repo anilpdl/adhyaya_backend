@@ -59,3 +59,12 @@ export const getCount = async () => {
     throw err;
   }
 }
+
+export const getEducation = async (id) => {
+  try {
+    const education = await User.forge({ id }).fetch({ withRelated: ['educationDetails'] });
+    return education.related('educationDetails');
+  } catch (err) {
+    throw err;
+  }
+}
