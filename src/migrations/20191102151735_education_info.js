@@ -10,7 +10,7 @@ exports.up = function (knex, Promise) {
     table.string('board');
     table.string('grade');
     table.string('marks');
-    table.date('passed_year');
+    table.integer('passed_year');
     table.timestamps();
   });
 };
