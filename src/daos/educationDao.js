@@ -7,14 +7,16 @@ export const fetch = async (id) => {
 }
 
 export const destroy = async (id) => {
-  const deleteStatus = await Education.forge({ id }).destroy();
-  return deleteStatus;
+  try {
+    const deleteStatus = await Education.forge({ id }).destroy();
+    return deleteStatus;
+  } catch(err) {
+    console.log(err)
+  }
 }
 
 export const addNew = async (data, userId) => {
-  const { passed_year } = data;
-  const date = new Date(passed_year);
-  const newData = await Education.forge({ ...data, user_id: userId, passed_year: date }).save();
+  const newData = await Education.forge({ ...data, user_id: userId }).save();
 
   return newData;
 }

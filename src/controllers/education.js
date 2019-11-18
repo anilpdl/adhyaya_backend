@@ -36,9 +36,9 @@ export const addNew = async (req, res) => {
 }
 
 export const updateDetails = async (req, res) => {
-  const authData = await AuthController.checkAccess(req, res);
+  // const authData = await AuthController.checkAccess(req, res);
   const education = req.body;
-  if (!authData.isInvalid) {
+  if (education) {
     const newEducation = await Education.update(education);
     return res.send(newEducation);
   }
@@ -47,9 +47,8 @@ export const updateDetails = async (req, res) => {
 }
 
 export const deleteEducation = async (req, res) => {
-  const authData = await AuthController.checkAccess(req, res);
   const {id} = req.params;
-  if (!authData.isInvalid) {
+  if (id) {
     const status = await Education.destroy(id);
     return res.send(status);
   }
