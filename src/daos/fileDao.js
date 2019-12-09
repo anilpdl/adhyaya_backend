@@ -21,9 +21,7 @@ export const getDetail = async (id) => {
 export const updateDetails = async (id, approver_id) => {
   try {
     const file = await getDetail(id);
-    console.log(file.toJSON());
     const updatedFile = await file.save({ is_approved: true, approver_id });
-    console.log(updatedFile);
     return updatedFile;
   } catch (err) {
     throw err;

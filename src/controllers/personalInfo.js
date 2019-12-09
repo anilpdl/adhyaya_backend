@@ -1,9 +1,24 @@
-import bookshelf from '../utils/db';
+import bookshelf from "../utils/db";
 
-import * as PersonalInfo from '../daos/personalInfoDao';
-import * as User from '../daos/userDao';
+import * as PersonalInfo from "../daos/personalInfoDao";
+import * as User from "../daos/userDao";
 
-import * as AuthController from './authController';
+import * as AuthController from "./authController";
+
+export const getDetail = async (req, res) => {
+  const authData = await AuthController.checkAccess(req, res);
+  const { userId } = req.params;
+  const user = await User.getDetail(userId);
+  if (user) {
+    if (!authData.isInvalid) {
+      const personalInfo = await PersonalInfo.fetchByUserId(userId);
+      return res.send(personalInfo);
+    }
+    return res.status(403).send({ message: "Access Forbidden" });
+  }
+
+  return res.status(404).send({ message: "Not Found" });
+};
 
 export const addNew = async (req, res) => {
   const authData = await AuthController.checkAccess(req, res);
@@ -17,8 +32,8 @@ export const addNew = async (req, res) => {
     }
   }
 
-  return res.status(404).send({ message: 'Not Found' });
-}
+  return res.status(404).send({ message: "Not Found" });
+};
 
 export const updateDetails = async (req, res) => {
   // const authData = await AuthController.checkAccess(req, res);
@@ -28,8 +43,8 @@ export const updateDetails = async (req, res) => {
     return res.send(newPersonalInfo);
   }
 
-  return res.status(404).send({ message: 'Not Found' });
-}
+  return res.status(404).send({ message: "Not Found" });
+};
 
 export const addOrUpdate = async (req, res) => {
   const { userId } = req.params;
@@ -43,7 +58,7 @@ export const addOrUpdate = async (req, res) => {
     updateDetails(req, res);
     return;
   }
-}
+};
 
 export const deleteInfo = async (req, res) => {
   const { id } = req.params;
@@ -52,5 +67,5 @@ export const deleteInfo = async (req, res) => {
     return res.send(status);
   }
 
-  return res.status(404).send({ message: 'Not Found' });
-}
+  return res.status(404).send({ message: "Not Found" });
+};

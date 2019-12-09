@@ -10,7 +10,7 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 router.use(cors());
 
-// router.get('/', contactHandlers.getAll);
+router.get('/', contactHandlers.getDetail);
 
 router.post('/:userId/add', contactHandlers.addNew);
 router.post('/:id/update', contactHandlers.updateDetails);
