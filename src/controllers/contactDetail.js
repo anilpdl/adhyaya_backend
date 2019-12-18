@@ -45,6 +45,20 @@ export const updateDetails = async (req, res) => {
   return res.status(404).send({ message: "Not Found" });
 };
 
+export const addOrUpdate = async (req, res) => {
+  const { userId } = req.params;
+  const existingInfo = await ContactDetail.fetchByUserId(userId);
+  if (!existingInfo) {
+    addNew(req, res);
+    return;
+  } else {
+    const { id } = existingInfo.toJSON();
+    req.body.id = id;
+    updateDetails(req, res);
+    return;
+  }
+};
+
 export const deleteContact = async (req, res) => {
   const { id } = req.params;
   if (id) {

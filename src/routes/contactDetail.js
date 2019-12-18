@@ -12,7 +12,7 @@ router.use(cors());
 
 router.get('/', contactHandlers.getDetail);
 
-router.post('/:userId/add', contactHandlers.addNew);
+router.post('/:userId/add', contactHandlers.addOrUpdate);
 router.post('/:id/update', contactHandlers.updateDetails);
 
 router.delete('/:contactId', contactHandlers.deleteContact)
