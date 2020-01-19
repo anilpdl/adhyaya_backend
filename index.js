@@ -1,5 +1,5 @@
 import express from 'express';
-
+import bcrypt from 'bcrypt';
 import user from './src/routes/users';
 import userInvitation from './src/routes/userInvitations';
 import file from './src/routes/files';
@@ -10,6 +10,7 @@ import contact from './src/routes/contactDetail';
 
 import { USER_ROUTES } from './src/constants/routes';
 import { cloudinaryConfig } from './src/config/cloudinary';
+
 // Initialize http server
 const app = express();
 

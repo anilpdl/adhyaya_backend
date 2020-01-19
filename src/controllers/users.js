@@ -211,7 +211,7 @@ export const forgotPassword = async (req, res) => {
       const { first_name } = user.toJSON();
       const name = first_name;
       const passwordReset = await bookshelf.transaction(async (t) => {
-        const passwordResetToken = cryptoRandomString(8);
+        const passwordResetToken = cryptoRandomString({ length: 10 });
         const newPasswordReset = await ForgotPassword.createPasswordResetToken(email, passwordResetToken, t);
         const { token } = newPasswordReset.toJSON();
         if (token) {

@@ -16,7 +16,7 @@ export const create = async (req, res) => {
       if (user || userInvitation) {
         return res.status(403).json({ message: 'User with email already exists' });
       }
-      const invitation_token = cryptoRandomString(8);
+      const invitation_token = cryptoRandomString({ length: 10 });
       const newUserInvitation = await UserInvitation.createUserInvitation(email, invitation_token, t);
       const { token } = newUserInvitation.toJSON();
       if (token) {
