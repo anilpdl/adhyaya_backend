@@ -6,8 +6,8 @@ const { fromEmail, templateId, passwordResetTemplateId } = mailConstants;
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const URLS = {
-  INVITE: 'http://localhost:3000/user_invitation/token/:token',
-  PASSWORD_RESET: 'http://localhost:3000/password/reset/:token',
+  INVITE: 'https://adhyaya.poudelanil.com.np/user_invitation/token/:token',
+  PASSWORD_RESET: 'https://adhyaya.poudelanil.com.np/password/reset/:token',
 };
 
 const createUrl = (url, token) => {
