@@ -23,7 +23,7 @@ app.use('/personal_info', personalInfo);
 app.use('/contact', contact);
 
 // Launch the server on the port 8000
-const server = app.listen(8000, () => {
+const server = app.listen(process.env.PORT || 8000, () => {
   const { address, port } = server.address();
   console.log(address)
   console.log(`Listening at http://${address}:${port}`);
