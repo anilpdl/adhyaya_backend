@@ -3,7 +3,13 @@ import sgMail from '@sendgrid/mail';
 import mailConstants from '../constants/mailConstants';
 const { fromEmail, templateId, passwordResetTemplateId } = mailConstants;
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+console.log(process.env.SENDGRID_API_KEY);
+
+//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
+
+sgMail.setApiKey(
+  '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'
+);
 
 const URLS = {
   INVITE: 'https://adhyaya.poudelanil.com.np/user_invitation/token/:token',
