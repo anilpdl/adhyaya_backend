@@ -1,4 +1,4 @@
-import sgMail from '@sendgrid/mail';
+import sgMail, { send } from '@sendgrid/mail';
 
 import mailConstants from '../constants/mailConstants';
 const { fromEmail, templateId, passwordResetTemplateId } = mailConstants;
@@ -8,7 +8,7 @@ console.log(process.env.SENDGRID_API_KEY);
 //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
 
 sgMail.setApiKey(
-  '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'
+  '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'
 );
 
 const URLS = {
@@ -18,7 +18,8 @@ const URLS = {
 
 const createUrl = (url, token) => {
   return url.replace(':token', token);
-}
+};
+
 
 export const sendEmail = async (toEmail, token) => {
   try {
@@ -28,13 +29,14 @@ export const sendEmail = async (toEmail, token) => {
       from: fromEmail,
       template_id: templateId,
       dynamic_template_data: {
-        url
-      }
+        url,
+      },
     };
 
     return sgMail.send(msg, false, (error, result) => {
       if (error) {
-        console.log(":::ERROR::", error);
+        const e = {...error};
+        console.log(':::ERROR::', e.response.body);
         return error;
       }
       return result;
@@ -43,7 +45,7 @@ export const sendEmail = async (toEmail, token) => {
     console.log(':::ERROR__CAPTURED::', error);
     throw err;
   }
-}
+};
 
 export const sendPasswordResetMail = async (toEmail, name, token) => {
   try {
@@ -54,8 +56,8 @@ export const sendPasswordResetMail = async (toEmail, name, token) => {
       template_id: passwordResetTemplateId,
       dynamic_template_data: {
         url,
-        name
-      }
+        name,
+      },
     };
 
     return sgMail.send(msg, false, (error, result) => {
@@ -67,7 +69,7 @@ export const sendPasswordResetMail = async (toEmail, name, token) => {
   } catch (err) {
     throw err;
   }
-}
+};
 
 export const sendSubscriptionEmail = async (email) => {
   try {
@@ -75,7 +77,7 @@ export const sendSubscriptionEmail = async (email) => {
       to: 'poudelanil1996@gmail.com',
       from: 'info@adhyaya.com.np',
       subject: 'Reach out',
-      text: `${email} wants to know more about Adhyaya Educational Services`
+      text: `${email} wants to know more about Adhyaya Educational Services`,
     };
 
     return sgMail.send(msg, false, (error, result) => {
@@ -87,4 +89,4 @@ export const sendSubscriptionEmail = async (email) => {
   } catch (err) {
     throw err;
   }
-}
+};
