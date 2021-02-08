@@ -34,11 +34,13 @@ export const sendEmail = async (toEmail, token) => {
 
     return sgMail.send(msg, false, (error, result) => {
       if (error) {
+        console.log(":::ERROR::", error);
         return error;
       }
       return result;
     });
   } catch (err) {
+    console.log(':::ERROR__CAPTURED::', error);
     throw err;
   }
 }
